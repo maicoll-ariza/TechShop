@@ -1,12 +1,19 @@
+using Serilog;
 using Microsoft.EntityFrameworkCore;
-using TechShop.Application.Features.Products.Queries;
 using TechShop.Application.Interfaces;
 using TechShop.Infrastructure.Persistence;
 using TechShop.Infrastructure.Repositories;
+using TechShop.Application.Features.Products.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 
@@ -22,4 +29,16 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.Run();
+
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "La aplicación terminó inesperadamente");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
