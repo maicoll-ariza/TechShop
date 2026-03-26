@@ -3,8 +3,8 @@ using TechShop.Application.Interfaces;
 using TechShop.Domain.Entities;
 using TechShop.Infrastructure.Persistence;
 
-
 namespace TechShop.Infrastructure.Repositories; 
+
 public class ProductRepository : IProductRepository
 {
     

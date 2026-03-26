@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<bool> ExistsAsync(string email);
     Task<User> CreateAsync(User user);
     Task UpdateAsync(User user);
+    Task<User?> GetByRefreshTokenAsync(string refreshToken);
 }
