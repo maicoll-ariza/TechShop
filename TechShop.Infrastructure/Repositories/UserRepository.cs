@@ -5,15 +5,10 @@ using TechShop.Application.Interfaces;
 using TechShop.Infrastructure.Persistence;
 
 namespace TechShop.Infrastructure.Repositories;
-public class UserRepository : IUserRepository
+public class UserRepository(AppDbContext appDbContext) : IUserRepository
 {
 
-    private readonly AppDbContext _context;
-    
-    public UserRepository(AppDbContext appDbContext)
-    {
-        _context = appDbContext;
-    }
+    private readonly AppDbContext _context = appDbContext;
 
     public async Task<User?> GetByIdAsync(int id)
     {

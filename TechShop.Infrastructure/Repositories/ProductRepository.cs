@@ -5,15 +5,10 @@ using TechShop.Infrastructure.Persistence;
 
 namespace TechShop.Infrastructure.Repositories; 
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(AppDbContext context) : IProductRepository
 {
     
-    private readonly AppDbContext _context;
-
-    public ProductRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Product> CreateAsync(Product product)
     {

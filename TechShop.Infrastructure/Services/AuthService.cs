@@ -7,21 +7,14 @@ using TechShop.Domain.Entities;
 
 namespace TechShop.Infrastructure.Services;
 
-public class AuthService : IAuthService
+public class AuthService(
+    IUserRepository userRepository,
+    JwtService jwtService,
+    IOptions<JwtSettings> jwtSettings) : IAuthService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly JwtService _jwtService;
-    private readonly JwtSettings _jwtSettings;
-
-    public AuthService(
-        IUserRepository userRepository,
-        JwtService jwtService,
-        IOptions<JwtSettings> jwtSettings)
-    {
-        _userRepository = userRepository;
-        _jwtService = jwtService;
-        _jwtSettings = jwtSettings.Value;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly JwtService _jwtService = jwtService;
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
     public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
     {
