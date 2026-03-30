@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TechShop.Application.Common;
 using TechShop.Application.Features.Auth.DTOs;
 using TechShop.Application.Interfaces;
 
@@ -16,9 +17,9 @@ public class AuthController(IAuthService _authService) : ControllerBase
     {
         var result = await _authService.RegisterAsync(dto);
 
-        if(result == null) return Unauthorized("No se puede registrar. Correo en uso.");
+        if(result == null) return BadRequest(ApiResponse<AuthResponse>.Fail("No se pudo registrar. Correo en uso"));
 
-        return Ok(result);
+        return Ok(ApiResponse<AuthResponse>.Ok(result, "Usuario registrado correctamente"));
     }
 
     [HttpPost("login")]
@@ -26,17 +27,27 @@ public class AuthController(IAuthService _authService) : ControllerBase
     {
         var result = await _authService.LoginAsync(dto);
 
-        if (result == null) return Unauthorized("Correo o contraseña incorrecta");
+        if (result == null) return BadRequest(ApiResponse<AuthResponse>.Fail("Correo o contraseña incorrecta"));
 
-        return Ok(result);
+        return Ok(ApiResponse<AuthResponse>.Ok(result));
     }
 
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshToken)
     {
         var result = await _authService.RefreshTokenAsync(refreshToken.RefreshToken);
-        if(result == null) return Unauthorized("Token inválido");
-        return Ok(result);
+        if(result == null) return Unauthorized(ApiResponse<AuthResponse>.Fail("Token inválido"));
+        return Ok(ApiResponse<AuthResponse>.Ok(result));
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest logoutRequest)
+    {
+        var result = await _authService.LogoutAsync(logoutRequest.RefreshToken);
+        if(result) return Ok(ApiResponse<string>.Ok("Se ha cerrado la sesión exitosamente"));
+
+        return BadRequest(ApiResponse<string>.Fail("No se pudo cerrar la sesión"));
     }
 
 }

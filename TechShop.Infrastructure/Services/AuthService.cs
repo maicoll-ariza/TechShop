@@ -66,6 +66,19 @@ public class AuthService(
         return BuildAuthResponse(user);
     }
 
+    public async Task<bool> LogoutAsync(string refreshToken)
+    {
+        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+
+        if(user == null) return false;
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+
+        await _userRepository.UpdateAsync(user);
+        return true;
+    }
+
     private AuthResponse BuildAuthResponse(User user)
     {
         return new AuthResponse
