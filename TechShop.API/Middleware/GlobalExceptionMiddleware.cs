@@ -1,5 +1,5 @@
-using System.Net;
 using TechShop.Application.Common;
+using TechShop.Domain.Exceptions;
 
 namespace TechShop.API.Middleware;
 
@@ -20,27 +20,24 @@ public class GlobalExceptionMiddleware
         {
             await _next(context);
         }
+        catch (BusinessException ex)
+        {
+            _logger.LogWarning("Error de negocio: {Message}", ex.Message);
+            await HandleExceptionAsync(context, ex.Message, StatusCodes.Status400BadRequest);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error no controlado: {Message}", ex.Message);
-
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, "Ocurrió un error interno en el servidor.", StatusCodes.Status500InternalServerError);
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private static async Task HandleExceptionAsync(HttpContext context, string message, int statusCode)
     {
         context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
 
-        var statusCode = HttpStatusCode.InternalServerError;
-
-        var response = ApiResponse<object>.Fail(
-            "Ocurrió un error interno en el servidor.",
-            new List<string> { ex.Message }
-        );
-
-        context.Response.StatusCode = (int)statusCode;
-
+        var response = ApiResponse<object>.Fail(message);
         await context.Response.WriteAsJsonAsync(response);
     }
 }

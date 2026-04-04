@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +56,10 @@ public class AppDbContext : DbContext
                 .HasColumnType("decimal(18,2)");
         });
 
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.Property(ci => ci.Quantity)
+                .IsRequired();
+        });
     }
 }

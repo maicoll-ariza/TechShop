@@ -4,6 +4,7 @@ using TechShop.Application.Common.Settings;
 using TechShop.Application.Features.Auth.DTOs;
 using TechShop.Application.Interfaces;
 using TechShop.Domain.Entities;
+using TechShop.Domain.Exceptions;
 
 namespace TechShop.Infrastructure.Services;
 
@@ -16,10 +17,10 @@ public class AuthService(
     private readonly JwtService _jwtService = jwtService;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
-    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         if (await _userRepository.ExistsAsync(request.Email))
-            return null;
+        throw new BusinessException("El correo ya está en uso");
 
         var user = new User
         {
@@ -36,12 +37,12 @@ public class AuthService(
         return BuildAuthResponse(user);
     }
 
-    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return null;
+            throw new BusinessException("Correo o contraseña incorrectos");
 
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
@@ -51,12 +52,12 @@ public class AuthService(
         return BuildAuthResponse(user);
     }
 
-    public async Task<AuthResponse?> RefreshTokenAsync(string refreshToken)
+    public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
     {
         var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
 
         if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
-            return null;
+            throw new BusinessException("Token inválido o expirado");
 
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
@@ -70,7 +71,8 @@ public class AuthService(
     {
         var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
 
-        if(user == null) return false;
+        if (user == null)
+            throw new BusinessException("Token inválido");
 
         user.RefreshToken = null;
         user.RefreshTokenExpiry = null;
