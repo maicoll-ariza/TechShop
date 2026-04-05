@@ -1,10 +1,11 @@
 using MediatR;
-using TechShop.Application.Interfaces;
 using TechShop.Domain.Entities;
+using TechShop.Application.Interfaces;
+using TechShop.Application.Features.Products.DTOs;
 
 namespace TechShop.Application.Features.Products.Queries;
 
-public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<Product>>
+public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<ProductDto>>
 {
     private readonly IProductRepository _productRepository;
 
@@ -13,8 +14,19 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumer
         _productRepository = productRepository;
     }
 
-    public async Task<IEnumerable<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        return await _productRepository.GetAllAsync();
+        var products = await _productRepository.GetAllAsync();
+        return products.Select(p => new ProductDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            Price = p.Price,
+            Stock = p.Stock,
+            ImageUrl = p.ImageUrl,
+            IsActive = p.IsActive,
+            CategoryName = p.Category.Name
+        });
     }
 }

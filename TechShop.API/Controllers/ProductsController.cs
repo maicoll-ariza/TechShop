@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechShop.Application.Features.Products.Queries;
 using TechShop.Application.Common;
 using TechShop.Domain.Entities;
+using TechShop.Application.Features.Products.DTOs;
 
 namespace TechShop.API.Controllers;
 
@@ -20,7 +21,7 @@ private readonly IMediator _mediator = mediator;
     public async Task<IActionResult> GetProducts()
     {
         var products = await _mediator.Send(new GetProductsQuery());
-        return Ok(ApiResponse<IEnumerable<Product>>.Ok(products, "Productos obtenidos exitosamente"));
+        return Ok(ApiResponse<IEnumerable<ProductDto>>.Ok(products, "Productos obtenidos exitosamente"));
     }
 
 }

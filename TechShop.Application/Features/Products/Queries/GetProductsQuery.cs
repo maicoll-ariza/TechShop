@@ -1,6 +1,6 @@
 using MediatR;
-using TechShop.Domain.Entities;
+using TechShop.Application.Features.Products.DTOs;
 
 namespace TechShop.Application.Features.Products.Queries;
 
-public record GetProductsQuery() : IRequest<IEnumerable<Product>>;
+public record GetProductsQuery() : IRequest<IEnumerable<ProductDto>>;
